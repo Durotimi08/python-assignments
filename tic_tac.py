@@ -296,7 +296,9 @@ def gengame(lastmove):
                     elif (list[2][1] == letter) and (list[1][2] == letter):
                         list[2][2] = comp_letter
                     else:
-                        if list[1][0] == " ":
+                        if (list[1][0] == letter) and (list[1][2] == letter):
+                            list[0][2] = comp_letter
+                        elif list[1][0] == " ":
                             list[1][0] = comp_letter
                         else:
                             list[1][2] = comp_letter
