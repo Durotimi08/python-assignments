@@ -186,7 +186,7 @@ def donate(account):
          update()
          print("Thanks for donating to those in need ❤")
       else:
-         print("Invalid input")
+         print("Invalid pin")
          time.sleep(0.6)
    home(account)
 
