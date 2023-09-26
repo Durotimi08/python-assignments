@@ -1,29 +1,34 @@
 import time
 import random
+
+#dictionary for storing data
 bank_records = {}
+
+#setting the initial account balance on register
 initial_account_balance = float(0)
+
+#operations that can be performed with the bank app
 operations = ["Send money", "Deposit money", "Donate to charity", "Logout"]
 
+#first function to be initialized
 def begin():
-   print('''Welcome to NATH bank
-      ''')
+   print("Welcome to NATH bank\n")
    print("1. Create an account")
    print("2. Sign in to your account")
-   confirm = True
-   while confirm:
-      try:
-         nxt = int(input("Which operation will you like to perform: "))
-         print()
-         if nxt == 1:
-            registration()
-         elif nxt == 2:
-            login()
-      except:
-         print("Invalid input")
-      finally:
-         begin()
-         
    
+   while True:
+      try:
+         choice = int(input("Which operation will you like to perform: "))
+         if choice == 1:
+               registration()
+         elif choice == 2:
+               login()
+         else:
+               print("Invalid choice. Please select 1 or 2.")
+      except ValueError:
+         print("Invalid input. Please enter a valid number.")
+         
+#generating account number for new users  
 def generate_account_number():
    account_number = ""
    for i in range(10):
@@ -31,58 +36,47 @@ def generate_account_number():
       account_number += str(value)
    return account_number
 
+#registration for bank app
 def registration():
-   print("Create an account")
+   print("\nCreate an account")
    first_name = input("Input your Firstname: ").upper()
    last_name = input("Input your Lastname: ")
    password = input("Create a password: ")
-   confirm = True
-   while confirm:
+   while True:
       try:
          year_of_birth = int(input("Year of birth: "))
          if (2023 - year_of_birth) < 18:
-            print()
-            print("You are too young to create an account")
-            begin()
-            confirm = False
-         else:
-            confirm = False
-      except:
+               print("\nYou are too young to create an account")
+               return begin()
+         break
+      except ValueError:
          print("Invalid year of birth")
-   confirm = True
-   while confirm:
-      try:
-         pin = input("Set-up your 4-digit pin: ")
-         if len(pin) != 4:
-            print("Invalid input")
-         else:
-            account_number = generate_account_number()
-            bank_records[account_number] = [first_name, last_name, password, year_of_birth, account_number, initial_account_balance, [], str(pin)]
-            print()
-            print("Processing...")
-            time.sleep(0.6)
-            home(bank_records[account_number])
-      except:
+   while True:
+      pin = input("Set-up your 4-digit pin: ")
+      if len(pin) != 4:
          print("Invalid input")
-
-def login():
-   confirm = True
-   print("Login to your account")
-   while confirm:
-      try:
-         account_number = input("Account number: ")
-         password = input("Password: ")
-         print()
-         print("Processing...")
+      else:
+         account_number = generate_account_number()
+         bank_records[account_number] = [first_name, last_name, password, year_of_birth, account_number, initial_account_balance, [], pin]
+         print("\nProcessing...")
          time.sleep(0.6)
-         if bank_records[account_number][2] == password:
-            home(bank_records[account_number])
-            confirm = False
-         else:
-            print("Invalid account number or password")
-      except:
+         home(bank_records[account_number])
+
+#login for bank app
+def login():
+   print("\nLogin to your account")
+   while True:
+      account_number = input("Account number: ")
+      password = input("Password: ")
+      print("\nProcessing...")
+      time.sleep(0.6)
+      if account_number in bank_records and bank_records[account_number][2] == password:
+         home(bank_records[account_number])
+         break
+      else:
          print("Invalid account number or password")
 
+#home page for bank app
 def home(account):
       print()
       print(f"Welcome {account[0]}({account[4]})")
@@ -94,68 +88,64 @@ def home(account):
       for idx,value in enumerate(operations, 1):
          print(f" {idx}. {value}")
       print()
-      confirm = True
-      while confirm:
+      while True:
          try:
-            val = int(input("Which operation will you like to perform: "))    
-            print("Processing...")
-            time.sleep(0.6)
-            print()
-            if val == 1:
-               send_money(account)
-            elif val == 2:
-               deposit_money(account)
-            elif val == 3:
-               donate(account)
-            elif val == 4:
-               print("Thanks for banking with us 😊")
-               begin()
-         except:
-            print("Invaid input")
-         else:
-            confirm = False
+               choice = int(input("Which operation will you like to perform: "))
+               if choice == 1:
+                  send_money(account)
+               elif choice == 2:
+                  deposit_money(account)
+               elif choice == 3:
+                  donate(account)
+               elif choice == 4:
+                  print("Thanks for banking with us 😊")
+                  return begin()
+               else:
+                  print("Invalid choice. Please select 1, 2, 3, or 4.")
+         except ValueError:
+               print("Invalid input. Please enter a valid number.")
 
+#send money operation
 def send_money(account):
-   print("Send money to:")
-   x = 0
-   z = []
-   for i,y in bank_records.items():
-      x += 1
-      if y[4] == account[4]:
-         x -= 1
-      else:
-         print(f"{x}. {y[0]} {y[1]}")
-         z.append(i)
-   if x == 0:
+   print("\nSend money to:")
+   recipients = []
+   for acc_num, details in bank_records.items():
+      if acc_num != account[4]:
+         recipients.append(acc_num)
+         print(f"{len(recipients)}. {details[0]} {details[1]}")
+   if not recipients:
       print("Sorry! no user available to send money to")
-      home(account)
-   nxt = int(input("Who will you like to send money to: "))
-   if (nxt > 0) and (nxt <= x):
-      nxt2 = float(input("How much do you want to transfer: "))
-      if (account[5] - nxt) < 0:
-         print("Sorry! unsufficient balance")
-      else:
-         password = int(input("Enter 4-digit pin: "))
-         if password == account[7]:
-            print("Processing...")
-            print()
-            time.sleep(0.6)
-            bank_records[z[nxt-1]][5] += nxt2
-            account[5] -= nxt2
-            bank_records[z[nxt-1]][6].append(f"Recieved {nxt2} from {account[0]} {account[1]}")
-            print("Transfer succesful")
-            home(account)
+      return home(account)
+   
+   while True:
+      try:
+         choice = int(input("Who will you like to send money to: "))
+         if 1 <= choice <= len(recipients):
+               recipient_acc_num = recipients[choice - 1]
+               amount = float(input("How much do you want to transfer: "))
+               
+               if account[5] - amount < 0:
+                  print("Sorry! insufficient balance")
+               else:
+                  pin = input("Enter 4-digit pin: ")
+                  if pin == account[7]:
+                     print("Processing...")
+                     time.sleep(0.6)
+                     bank_records[recipient_acc_num][5] += amount
+                     account[5] -= amount
+                     bank_records[recipient_acc_num][6].append(f"Received {amount} from {account[0]} {account[1]}")
+                     print("Transfer successful")
+                  else:
+                     print("Invalid pin")
+               return home(account)
          else:
-            print("Invalid input")
-            time.sleep(0.6)
-            home(account)
-   else:
-      print("Invalid input")
-      time.sleep(0.6)
-      home(account)
+               print("Invalid choice. Please select a valid recipient.")
+      except ValueError:
+         print("Invalid input. Please enter a valid number.")
 
+#deposit money operation
 def deposit_money(account):
-   nxt = int(input("How much do you want to add: "))
+   nxt = float(input("How much do you want to add: "))
    account[5] += nxt
    print()
    print("Processing...")
@@ -163,12 +153,12 @@ def deposit_money(account):
    print("Deposit completed successfully ✔")
    home(account)
 
+#donate money operation
 def donate(account):
-   nxt = int(input("How much do you want to donate: "))
+   nxt = float(input("How much do you want to donate: "))
    if (account[5] - nxt) < 0:
       print("Sorry! unsufficient balance")
       time.sleep(0.6)
-      home(account)
    else:
       password = input("Enter 4-digit pin: ")
       if (password == account[7]):
@@ -177,10 +167,9 @@ def donate(account):
          time.sleep(0.6)
          account[5] -= nxt
          print("Thanks for donating to those in need ❤")
-         home(account)
       else:
          print("Invalid input")
          time.sleep(0.6)
-         home(account)
+   home(account)
 
 begin()
