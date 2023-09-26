@@ -1,8 +1,11 @@
 import time
+import json
 import random
 
 #dictionary for storing data
-bank_records = {}
+f = open("db.json", "r")
+x = json.loads(f.read())
+bank_records = x
 
 #setting the initial account balance on register
 initial_account_balance = float(0)
@@ -27,7 +30,13 @@ def begin():
                print("Invalid choice. Please select 1 or 2.")
       except ValueError:
          print("Invalid input. Please enter a valid number.")
-         
+
+def update():
+    x = json.dumps(bank_records)
+    f = open("db.json", "w")
+    f.write(x)
+    f.close()
+          
 #generating account number for new users  
 def generate_account_number():
    account_number = ""
@@ -58,6 +67,7 @@ def registration():
       else:
          account_number = generate_account_number()
          bank_records[account_number] = [first_name, last_name, password, year_of_birth, account_number, initial_account_balance, [], pin]
+         update()
          print("\nProcessing...")
          time.sleep(0.6)
          home(bank_records[account_number])
@@ -75,6 +85,10 @@ def login():
          break
       else:
          print("Invalid account number or password")
+         nxt = input("Do you want to create an account Y/N: ").lower()
+         if nxt == "y":
+            registration()
+         print()
 
 #home page for bank app
 def home(account):
@@ -83,6 +97,7 @@ def home(account):
       for i in account[6]:
          print(f"{i}")
       account[6].clear()
+      update()
       print()
       print(f"Bal: ${account[5]}")
       for idx,value in enumerate(operations, 1):
@@ -133,7 +148,8 @@ def send_money(account):
                      time.sleep(0.6)
                      bank_records[recipient_acc_num][5] += amount
                      account[5] -= amount
-                     bank_records[recipient_acc_num][6].append(f"Received {amount} from {account[0]} {account[1]}")
+                     bank_records[recipient_acc_num][6].append(f"Received ${amount} from {account[0]} {account[1]}")
+                     update()
                      print("Transfer successful")
                   else:
                      print("Invalid pin")
@@ -147,6 +163,7 @@ def send_money(account):
 def deposit_money(account):
    nxt = float(input("How much do you want to add: "))
    account[5] += nxt
+   update()
    print()
    print("Processing...")
    time.sleep(0.6)
@@ -166,6 +183,7 @@ def donate(account):
          print()
          time.sleep(0.6)
          account[5] -= nxt
+         update()
          print("Thanks for donating to those in need ❤")
       else:
          print("Invalid input")
