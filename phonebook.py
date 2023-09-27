@@ -7,9 +7,8 @@ phone_book = {
 }
 actions = ["See all numbers", "Add a number", "Add multiple numbers", "Delete a name", "Clear the phonebook"]
 
-print("Welcome user")
-
 def show():
+    print("Welcome user")
     for i in range(len(actions)):
         print(f'{i+1} {actions[i]}')
     print("")
@@ -56,4 +55,3 @@ def show():
     lastq = input("Would you like to perform another action Y/N: ").lower()
     if lastq == "y":
         show()
-show()

@@ -296,7 +296,9 @@ def gengame(lastmove):
                     elif (list[2][1] == letter) and (list[1][2] == letter):
                         list[2][2] = comp_letter
                     else:
-                        if list[1][0] == " ":
+                        if (list[1][0] == letter) and (list[1][2] == letter):
+                            list[0][2] = comp_letter
+                        elif list[1][0] == " ":
                             list[1][0] = comp_letter
                         else:
                             list[1][2] = comp_letter
@@ -531,20 +533,23 @@ def bhh():
     else:
         start(lastmove)
 
-print('''Welcome to Tic-Tac-Toe
-      ''')
-letter = input("Choose 'X' or Any letter to play with: ").upper()
-if letter != "O":
-    comp_letter = "O"
-else:
-    comp_letter = "X"
-print()
-print(f"Computer will play as '{comp_letter}'")
-first = input("Should Computer play first Y/N: ").lower()
-print()
-if first == "y":
-    move[0] = False
-    bhh()
-elif first == "n":
-    move[0] = True
-    bhh()
+def new():
+    print('''Welcome to Tic-Tac-Toe
+        ''')
+    global comp_letter
+    global letter
+    letter = input("Choose 'X' or Any letter to play with: ").upper()
+    if letter != "O":
+        comp_letter = "O"
+    else:
+        comp_letter = "X"
+    print()
+    print(f"Computer will play as '{comp_letter}'")
+    first = input("Should Computer play first Y/N: ").lower()
+    print()
+    if first == "y":
+        move[0] = False
+        bhh()
+    elif first == "n":
+        move[0] = True
+        bhh()
