@@ -1,8 +1,5 @@
 import random
 tests = [["1. Math ", []]]
-print("Welcome to our cbt app"); print()
-stu = int(input("How many students will be taking this test: "))
-num = input("How many questions will they be answering: ")
 scores = {}
 def opera():
     print(""); test()
@@ -92,9 +89,15 @@ def genmath(num):
             x = random.randint(1, 20); y = random.randint(1, 20); ans = x-y
             other_opt1 = ans-x; other_opt2 = ans/x-y; other_opt3 = ans-x-y
             tests[0][1].extend([[x, y, f, set((round(other_opt1), round(other_opt2), round(other_opt3), ans))]])
-for i in range(stu):
-    opera()
-print()
-print("The scores are as follows")
-for x,y in scores.items():
-    print(f"{x}: {y}/{num}")
+
+def begin():
+    print("Welcome to our cbt app"); print()
+    global num
+    stu = int(input("How many students will be taking this test: "))
+    num = input("How many questions will they be answering: ")
+    for i in range(stu):
+        opera()
+    print()
+    print("The scores are as follows")
+    for x,y in scores.items():
+        print(f"{x}: {y}/{num}")

@@ -1,14 +1,16 @@
-operations = ["Intersection", "isdisjoint", "Union", "Symmetric_difference_update"]
+operatio = ["Intersection", "isdisjoint", "Union", "Symmetric_difference_update"]
 box = []
 
-for i in range(3):
-    first = input(f'Input your desired numbers for List {i+1}: ').split()
-    box.append(set(first))
+def begin():
+    for i in range(3):
+        first = input(f'Input your desired numbers for List {i+1}: ').split()
+        box.append(set(first))
+    show()
 
 def show():
     print("")
-    for i in range(len(operations)):
-        print(f'{i+1}  {operations[i]}')
+    for i in range(len(operatio)):
+        print(f'{i+1}  {operatio[i]}')
     print("")
     answer = input("Which of the following operations do you want to perform: ")
     if answer == "1":
@@ -29,5 +31,4 @@ def show():
     if again == "y":
         show()
         
-show()
 

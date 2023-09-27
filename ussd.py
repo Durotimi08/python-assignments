@@ -51,21 +51,22 @@ def borrow_airtime():
     print("Processing...")
     time.sleep(2)
 
-while True:
-    print('''
-Welcome to our USSD Service''')
-    display_menu(first)
+def begin():
+    while True:
+        print('''
+    Welcome to our USSD Service''')
+        display_menu(first)
 
-    main_choice = select_option(first)
+        main_choice = select_option(first)
 
-    if main_choice == 1:
-        buy_data_plan()
-    elif main_choice == 2:
-        share_data_plan()
-    elif main_choice == 3:
-        check_data_balance()
-    elif main_choice == 4:
-        borrow_airtime()
-    elif main_choice == 5:
-        print("Thank you for using USSD Service. Goodbye!")
-        break
+        if main_choice == 1:
+            buy_data_plan()
+        elif main_choice == 2:
+            share_data_plan()
+        elif main_choice == 3:
+            check_data_balance()
+        elif main_choice == 4:
+            borrow_airtime()
+        elif main_choice == 5:
+            print("Thank you for using USSD Service. Goodbye!")
+            break

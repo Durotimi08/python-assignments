@@ -189,5 +189,3 @@ def donate(account):
          print("Invalid pin")
          time.sleep(0.6)
    home(account)
-
-begin()
