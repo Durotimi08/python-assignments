@@ -30,5 +30,5 @@ def show():
     again = input("Do you want to perform another operation Y/N: ").lower()
     if again == "y":
         show()
-        
+begin()      
 
