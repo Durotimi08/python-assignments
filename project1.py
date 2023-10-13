@@ -28,7 +28,7 @@ def query():
 def home(matric):
    mycursor.execute(f"select * from users where matric_number={matric}"); result = mycursor.fetchone()
    while True:
-      ans = input(f"\nWelcome, your matric number is ({matric}) \n Enter 1 to Take a test \n Enter 2 to print admission letter \n Enter 3 to Logout \n >>> ")
+      ans = input(f"\nWelcome {result[2]} {result[3]}, your matric number is ({matric}) \n Enter 1 to Take a test \n Enter 2 to print admission letter \n Enter 3 to Logout \n >>> ")
       if ans == "1":
          if result[-1] > 60:
             print("You have already been offered admission\n"); time.sleep(2)
@@ -55,6 +55,7 @@ def letter(name):
    return y
 def test():
    score = 0
+   print("\nThere are a total of 5 questions, 20 marks each, be sure to read and answer them carefully, Good luck\n")
    for i in range(len(operations[3])):
       print(operations[3][i][0])
       for j,x in enumerate(operations[3][i][3], 1):
