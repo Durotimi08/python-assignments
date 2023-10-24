@@ -95,7 +95,6 @@ class DB:
         try:
             self.mycursor.execute(f"SELECT * FROM {table} WHERE {column} = {figure}")
             result = self.mycursor.fetchall()
-            self.idx = result[0][1]
             self.mydb.commit()
             return result
         except:
@@ -122,7 +121,7 @@ class DB:
         except:
             return False
 # Account operations
-class method(DB):
+class method(DB, idx):
     def __init__(self):
         self.result = self.select("finance", "member_id", self.idx)
         self.id, self.memberid, self.borrowed, self.quota = self.result[0]
@@ -137,7 +136,7 @@ class method(DB):
             print(f"You curently owe {current_borrowed},\nPlease pay back to recieve another loan\n")
             return
         while True:
-            amount = int(input("How much would you like to borrow ($): "))
+            amount = int(input("How much would you like to borrow($): "))
             Borrow_limit = self.select("users", "accounttype", "admin")[0][6]
             if amount > Borrow_limit:
                 print("Borrowing limit exceeded\nPlease include a lower amount\n")
