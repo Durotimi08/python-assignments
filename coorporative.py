@@ -121,9 +121,9 @@ class DB:
         except:
             return False
 # Account operations
-class method(DB, idx):
-    def __init__(self):
-        self.result = self.select("finance", "member_id", self.idx)
+class method(DB):
+    def __init__(self, idx):
+        self.result = self.select("finance", "member_id", idx)
         self.id, self.memberid, self.borrowed, self.quota = self.result[0]
     def get(self, position):
         score = 0
