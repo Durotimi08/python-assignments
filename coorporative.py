@@ -34,7 +34,8 @@ class DB:
     def select(self, table, column, figure):
         try:
             self.mycursor.execute(f"SELECT * FROM {table} WHERE {column} = ?", (figure,))
-            return self.mycursor.fetchall()
+            output = self.mycursor.fetchall()
+            return output
         except Exception as e:
             return []
 
@@ -46,19 +47,50 @@ class DB:
         except Exception as e:
             return False
 
-class Method(DB):
+class user(DB):
     def __init__(self, idx):
-        self.result = self.select("finance", "memberid", idx)
-        if self.result:
+        super().__init__()
+        self.idx = idx
+        self.update()
+
+    def update(self):
+        self.user_info = self.select("users", "memberid", self.idx)
+        if len(self.user_info) > 0:
+            self.id, self.memberid, self.fname, self.lname, self.accounttype, self.approved, self.quota, self.password = self.user_info[0]
+            self.home()
+        self.result = self.select("finance", "memberid", self.idx)
+        if len(self.result) > 0:
             self.id, self.memberid, self.borrowed, self.borrowed_interest = self.result[0]
-        user_info = self.select("users", "memberid", idx)
-        if user_info:
-            user_info = user_info[0]
-            self.accounttype, self.quota = user_info[4], user_info[6]
+
+    def home(self):
+        while True:
+          print(f"\nWelcome {self.fname} {self.lname}({self.memberid})")
+          y = 1
+          ansi = []
+          membership = [
+              ["Pay quota", self.quotaa],
+              ["Borrow money", self.borrow],
+              ["Check all transactions", self.history],
+              ["Logout", self.logout]
+          ]
+          for x in range(int(self.accounttype) - 1, len(membership)):
+              ansi.append(membership[x])
+              print(f"{y}. {membership[x][0]}")
+              y += 1
+          try:
+              ans = int(input(">>> "))
+              if ans <= 0 or ans > len(ansi):
+                  print("Invalid input")
+              else:
+                  ansi[ans - 1][1]()
+                  self.update()
+          except Exception as e:
+              print(f"Invalid input: {e}")
+              self.home()
 
     def calculate_interest(self, amount):
         interest_rate = 0.07
-        if self.accounttype == "Non-member":
+        if self.accounttype == "admin":
             interest_rate = 0.10
         return amount + (amount * interest_rate)
 
@@ -68,46 +100,43 @@ class Method(DB):
             return
 
         while True:
-            amount = abs(int(input("How much would you like to borrow($): ")))
-            amount_with_interest = self.calculate_interest(amount)
-            borrow_limit = self.select("users", "accounttype", "admin")
-            if borrow_limit:
-                borrow_limit = borrow_limit[0][6]
-                if amount_with_interest > borrow_limit:
-                    print("Borrowing limit exceeded. Please include a lower amount.")
-                else:
-                    break
-            else:
-                print("Admin information not found. Please check the database.")
-                return
-
-            if self.execute_query("INSERT INTO finance (memberid, borrowed, interest) VALUES (?, ?, ?)", (self.memberid, amount_with_interest - amount, amount_with_interest)):
-                print(f"Borrowed {amount_with_interest}$ successfully.")
-                admin_memberid = 12345
-                new_quota_value = self.select("users", "memberid", admin_memberid)
-                if new_quota_value:
-                    new_quota_value = new_quota_value[0][6] + amount
-                    self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (new_quota_value, admin_memberid))
+            amount = input("How much would you like to borrow($): ")
+            if amount.isdigit():
+                amount = int(amount)
+                amount_with_interest = self.calculate_interest(amount)
+                borrow_limit = self.select("users", "accounttype", "admin")
+                if borrow_limit:
+                    borrow_limit = borrow_limit[0][6]
+                    if amount_with_interest > borrow_limit:
+                        print("Borrowing limit exceeded. Please include a lower amount.")
+                    else:
+                        break
                 else:
                     print("Admin information not found. Please check the database.")
-            else:
-                print("Error during the transaction.")
+                    return
 
-    def quota(self):
+        if self.execute_query("INSERT INTO finance (memberid, borrowed, interest) VALUES (?, ?, ?)", (self.idx, amount_with_interest - amount, amount_with_interest)):
+            print(f"Borrowed {amount_with_interest}$ successfully.")
+            borrow_limit = borrow_limit + amount
+            self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (borrow_limit, 123456))
+        else:
+            print("Error during the transaction.")
+
+    def quotaa(self):
         current_quota = self.quota
         print(f"Your current quota is: {current_quota}\n")
-        if current_quota > 0:
+        if current_quota < 0:
             while True:
                 que = input("Would you like to pay your quota (yes/no)\n>>> ").lower()
                 if que == "yes":
                     amount = abs(int(input("How much would you like to pay($): ")))
                     if isinstance(amount, int):
-                        user_quota = self.quota - (amount + (amount / 100))
+                        user_quota = self.quota + (amount + (amount / 100))
                         admin_memberid = 123456
                         admin_quota = self.select("users", "memberid", admin_memberid)
                         if admin_quota:
                             admin_quota = admin_quota[0][6] + amount
-                            if self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (user_quota, self.memberid)) and self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (admin_quota, admin_memberid)):
+                            if self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (user_quota, self.idx)) and self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (admin_quota, admin_memberid)):
                                 print(f"Paid {amount}$ successfully.")
                             else:
                                 print("Error during the transaction.")
@@ -122,10 +151,10 @@ class Method(DB):
             print("No transaction history found.")
         else:
             print("Transaction History:")
-            print(f"Borrowed: {self.result[0][2]}")
+            print(f"Borrowed: {self.result[0][3]}")
 
     def logout(self):
-        print("Logged out successfully.")
+        print("Logged out successfully.\n")
         begin()
 
 def begin():
@@ -157,10 +186,11 @@ def begin():
     print("\nProcessing...")
     time.sleep(2)
     if len(ans) == 2:
-        result = DB().select("users", "memberid", ans[0])
-        if result and len(result) > 0 and result[0][7] == ans[1]:
+        result = DB().select("users", "memberid", int(ans[0])
+        )
+        if len(result) > 0 and result[0][7] == ans[1]:
             print("Login successful.")
-            home(result[0])
+            user(result[0][1]).home()
         else:
             print("Invalid member_id or password.")
             begin()
@@ -169,35 +199,10 @@ def begin():
         if DB().execute_query("INSERT INTO users (memberid, fname, lname, accounttype, approved, quota, password) VALUES (?, ?, ?, ?, ?, ?, ?)", tuple(ans)):
             print("Registration successful.\n")
             user_info = DB().select("users", "memberid", ans[0])
-            if user_info and len(user_info) > 0:
-                home(user_info[0])
+            if len(user_info) > 0:
+                user(user_info[0][1]).home()
             else:
                 print("User information not found. Please check the database.")
-
-def home(record):
-    print(f"\nWelcome {record[2]} {record[3]}({record[1]})")
-    y = 1
-    ansi = []
-    membership = [
-        ["Pay quota", Method(record[1]).quota],
-        ["Borrow money", Method(record[1]).borrow],
-        ["Check all transactions", Method(record[1]).history],
-        ["Logout", Method(record[1]).logout]
-    ]
-    for x in range(len(membership)):
-        ansi.append(membership[x])
-        print(f"{y}. {membership[x][0]}")
-        y += 1
-    while True:
-        try:
-            ans = int(input(">>>"))
-            if ans <= 0 or ans > len(ansi):
-                print("Invalid input")
-            else:
-                ansi[ans - 1][1]()
-        except Exception as e:
-            print("Invalid input")
-            home(record)
 
 try:
     begin()
