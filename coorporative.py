@@ -96,8 +96,11 @@ class user(DB):
         return amount + (amount * interest_rate)
 
     def borrow(self):
+        value = 0
         if self.result:
-            print(f"You currently owe {self.borrowed_interest}. Please pay back to receive another loan.")
+            for i in range(len(self.result)):
+              value += self.result[i][3]
+            print(f"You currently owe {value}. Please pay back to receive another loan.")
             return
 
         while True:
@@ -116,7 +119,7 @@ class user(DB):
                     print("Admin information not found. Please check the database.")
                     return
 
-        if self.execute_query("INSERT INTO finance (memberid, value, borrowed, interest) VALUES (?, ?, ?, ?)", (self.idx, "Borrowed", amount_with_interest - amount, amount_with_interest)):
+        if self.execute_query("INSERT INTO finance (memberid, value, borrowed, interest) VALUES (?, ?, ?, ?)", (self.idx, "Borrowed", -abs(amount_with_interest - amount), amount_with_interest)):
             print(f"Borrowed {amount_with_interest}$ successfully.")
             borrow_limit = borrow_limit + amount
             self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (borrow_limit, 123456))
@@ -149,12 +152,11 @@ class user(DB):
 
     def history(self):
           print("Transaction History:")
-          esult = self.select("finance", "memberid", self.idx)
-          if len(esult) == 0:
+          if len(self.result) == 0:
             print("No transaction history found.")
           else:
-            for i in range(len(esult)):
-              print(f"{esult[i][2]}: {esult[i][3]}")
+            for i in range(len(self.result)):
+              print(f"{self.result[i][2]}: {self.result[i][3]}")
           return
 
 
