@@ -22,6 +22,7 @@ class DB:
                 CREATE TABLE IF NOT EXISTS finance (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     memberid INTEGER NOT NULL,
+                    value TEXT NOT NULL,
                     borrowed REAL NOT NULL,
                     interest REAL NOT NULL
                 );
@@ -54,13 +55,13 @@ class user(DB):
         self.update()
 
     def update(self):
+        self.result = self.select("finance", "memberid", self.idx)
+        if len(self.result) > 0:
+            self.id, self.memberid, self.operation, self.borrowed, self.borrowed_interest = self.result[-1]
         self.user_info = self.select("users", "memberid", self.idx)
         if len(self.user_info) > 0:
             self.id, self.memberid, self.fname, self.lname, self.accounttype, self.approved, self.quota, self.password = self.user_info[0]
             self.home()
-        self.result = self.select("finance", "memberid", self.idx)
-        if len(self.result) > 0:
-            self.id, self.memberid, self.borrowed, self.borrowed_interest = self.result[0]
 
     def home(self):
         while True:
@@ -115,7 +116,7 @@ class user(DB):
                     print("Admin information not found. Please check the database.")
                     return
 
-        if self.execute_query("INSERT INTO finance (memberid, borrowed, interest) VALUES (?, ?, ?)", (self.idx, amount_with_interest - amount, amount_with_interest)):
+        if self.execute_query("INSERT INTO finance (memberid, value, borrowed, interest) VALUES (?, ?, ?, ?)", (self.idx, "Borrowed", amount_with_interest - amount, amount_with_interest)):
             print(f"Borrowed {amount_with_interest}$ successfully.")
             borrow_limit = borrow_limit + amount
             self.execute_query('UPDATE users SET quota = ? WHERE memberid = ?', (borrow_limit, 123456))
@@ -147,11 +148,16 @@ class user(DB):
                     print("Invalid input. Please enter 'yes' or 'no'.")
 
     def history(self):
-        if not self.result:
+          print("Transaction History:")
+          esult = self.select("finance", "memberid", self.idx)
+          if len(esult) == 0:
             print("No transaction history found.")
-        else:
-            print("Transaction History:")
-            print(f"Borrowed: {self.result[0][3]}")
+          else:
+            for i in range(len(esult)):
+              print(f"{esult[i][2]}: {esult[i][3]}")
+          return
+
+
 
     def logout(self):
         print("Logged out successfully.\n")
